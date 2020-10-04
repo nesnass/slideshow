@@ -1,17 +1,18 @@
 <template>
-  <div class="flex flex-row justify-center">
-    <img
+  <div class="flex flex-row justify-center bg-black">
+    <div
       :src="currentSlide.url"
-      class="transition-opacity duration-700 ease-in h-auto lg:h-screen"
+      class="bg-contain bg-no-repeat bg-center transition-opacity duration-700 ease-in h-screen w-screen"
       :class="[showTheSlide ? 'showSlide' : 'hideSlide']"
-    />
+      :style="{ 'background-image': `url(${currentSlide.url})` }"
+    ></div>
     <p
       v-if="currentSlide.caption"
       class="absolute z-10 text-white bg-blue25 font-bold bottom-0 left-0 p-2"
     >
       {{ currentSlide.caption }}
     </p>
-    <img class="hidden" :src="nextSlide" width="1" height="1" />
+    <img class="hidden" :src="nextSlide.url" width="1" height="1" />
   </div>
 </template>
 
@@ -53,7 +54,7 @@ export default {
     watch(
       () => control.value.selectedSlideIndex,
       newIndex => {
-        if (slides.value.length > newIndex && newIndex > 0) {
+        if (slides.value.length > newIndex && newIndex >= 0) {
           clearTimeout(changeTimeout);
           clearTimeout(fadeTimeout);
           currentSlideIndex.value = newIndex;
@@ -96,6 +97,7 @@ export default {
 <style scoped>
 .showSlide {
   opacity: 1;
+  background-color: black;
 }
 .hideSlide {
   opacity: 0;

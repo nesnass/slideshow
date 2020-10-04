@@ -78,13 +78,24 @@ export default {
       control.value.paused = !control.value.paused;
     };
     const fullscreen = () => {
-      if (!document.fullscreenElement) {
-        const element = fselement.value;
-        element.requestFullscreen();
-        showFullscreen.value = true;
+      const element = fselement.value;
+      // Safari iOS
+      if (typeof document.webkitCurrentFullScreenElement !== "undefined") {
+        if (document.webkitFullscreenElement) {
+          document.webkitCancelFullScreen();
+          showFullscreen.value = false;
+        } else {
+          element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+          showFullscreen.value = true;
+        }
       } else {
-        document.exitFullscreen();
-        showFullscreen.value = false;
+        if (!document.fullscreenElement) {
+          element.requestFullscreen();
+          showFullscreen.value = true;
+        } else {
+          document.exitFullscreen();
+          showFullscreen.value = false;
+        }
       }
     };
     const callThumbs = () => {

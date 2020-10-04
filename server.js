@@ -1,3 +1,4 @@
+require('dotenv').config()
 const express = require("express");
 const router = express.Router();
 
@@ -6,7 +7,7 @@ const path = require("path");
 const app = express();
 const imagePath = path.join(path.resolve(__dirname), "/collections");
 const collections = ["vietnam"];
-const port = 3000;
+const port = process.env.PORT;
 
 function getListing(req, res, next) {
   const dir = req.query.collection;

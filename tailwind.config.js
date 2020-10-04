@@ -14,7 +14,8 @@ module.exports = {
       red: "#de3618",
       white: "#fff",
       cyan: "#00ffff",
-      goldenrod: "#daa520"
+      goldenrod: "#daa520",
+      black: "#000000"
     }
   },
   variants: {},
