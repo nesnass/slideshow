@@ -3770,6 +3770,11 @@ execa@^3.3.0:
     signal-exit "^3.0.2"
     strip-final-newline "^2.0.0"
 
+exifr@^5.0.6:
+  version "5.0.6"
+  resolved "https://registry.yarnpkg.com/exifr/-/exifr-5.0.6.tgz#7c8e5aad1083fa4ec172103dca24215203001209"
+  integrity sha512-iDB4IhKoKVF+uDDrHRlyNxWqGaTxYluVWqvBWVG54HkQZe8qkFYl9eQrjEP3d8Q4UMBZ9rWu3Pa+mfC+o4CZuw==
+
 expand-brackets@^2.1.4:
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/expand-brackets/-/expand-brackets-2.1.4.tgz#b77735e315ce30f6b6eff0f83b04151a22449622"
