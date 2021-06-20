@@ -6,6 +6,9 @@ module.exports = {
   purge: ["./public/**/*.html", "./src/**/*.vue"],
   theme: {
     extend: {},
+    scale: {
+      "25": ".25"
+    },
     colors: {
       indigo: "#5c6ac4",
       blue: "#007ace",
@@ -16,6 +19,10 @@ module.exports = {
       cyan: "#00ffff",
       goldenrod: "#daa520",
       black: "#000000"
+    },
+    fontFamily: {
+      playful: ["Comfortaa"],
+      serious: ["Inter"]
     }
   },
   variants: {},

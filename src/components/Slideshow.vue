@@ -1,45 +1,58 @@
 <template>
   <div class="flex flex-row justify-center bg-black">
     <div
-      :src="currentSlide.url"
-      class="flex flex-row justify-center bg-contain bg-no-repeat bg-center transition-opacity duration-700 ease-in h-screen w-screen"
+      class="flex flex-row justify-center bg-contain bg-no-repeat bg-center transition-opacity duration-700 ease-in h-screen"
       :class="[showTheSlide ? 'showSlide' : 'hideSlide']"
-      :style="{ 'background-image': `url(${currentSlide.url})` }"
+      :style="{
+        'background-image': !currentSlide.isVideo
+          ? `url(${currentSlide.url})`
+          : ''
+      }"
     >
       <div
         v-if="currentSlide.isVideo"
-        class="relative flex flex-row items-center"
+        class="relative flex flex-col justify-center items-center"
       >
-        <video
-          :src="currentSlide.url"
-          ref="videoRef"
-          @ended="videoPauseOrStop"
-        ></video>
+        <video :src="currentSlide.url" ref="videoRef" @ended="videoPauseOrStop">
+          <track label="English" kind="captions" srclang="en" src="" default />
+        </video>
         <img
           alt="play or pause video"
-          class="absolute z-20 w-12 bottom-0 left-0 ml-4 mb-4 cursor-pointer"
+          class="z-20 w-12 m-4 cursor-pointer"
           :class="{ 'filter-green': playing }"
           src="@/assets/playpause.svg"
           @click="playpause()"
         />
       </div>
     </div>
-    <p class="absolute z-10 text-white bg-blue25 bottom-50 right-0 p-2">
-      <span v-if="exif.latitude"
-        >{{ exif.latitude }}° + " " + {{ exif.longitude }}° <br
+    <p class="absolute z-10 text-white bg-blue25 bottom-0 right-0 p-2">
+      <!--span v-if="currentSlide.exif.GPSLatitude"
+        >{{ currentSlide.exif.GPSLatitude }}° + " " +
+        {{ currentSlide.exif.GPSLongitude }}° <br
+      /></span-->
+      <span
+        >F {{ Number.parseFloat(currentSlide.exif.ApertureValue).toFixed(1)
+        }}<br
       /></span>
-      <span>F {{ exif.aperture }}<br /></span>
-      <span>1/{{ exif.shutter }}s<br /></span>
-      <span>{{ exif.focallength }}mm<br /></span>
-      <span>ISO {{ exif.iso }}<br /></span>
-      <span>{{ exif.lens }}<br /></span>
+      <span
+        >1/{{
+          Math.round(1 / Number.parseFloat(currentSlide.exif.ShutterSpeed))
+        }}s<br
+      /></span>
+      <span>{{ currentSlide.exif.FocalLength }}mm<br /></span>
+      <span>ISO {{ currentSlide.exif.ISO }}<br /></span>
+      <span class="text-xs">{{ currentSlide.exif.LensModel }}<br /></span>
     </p>
-    <p
-      v-if="currentSlide.caption"
-      class="absolute z-10 text-white bg-blue25 font-bold bottom-0 right-0 p-2"
+    <div
+      class="absolute z-10 text-white bg-blue25 font-playful bottom-0 left-0 p-2"
     >
-      {{ currentSlide.caption }}
-    </p>
+      <p v-if="currentSlide.exif.Title" class="font-bold">
+        {{ currentSlide.exif.Title }}
+      </p>
+      <p v-if="currentSlide.exif.Description" class="text-sm">
+        {{ currentSlide.exif.Description }}
+      </p>
+    </div>
     <img
       class="hidden"
       alt="next slide url"
@@ -51,8 +64,7 @@
 </template>
 
 <script>
-import { computed, ref, reactive, watch, toRefs } from "vue";
-import exifr from "exifr/dist/full.esm.mjs";
+import { computed, ref, watch, toRefs } from "vue";
 const slide_interval = process.env.VUE_APP_SLIDE_INTERVAL;
 
 export default {
@@ -66,15 +78,6 @@ export default {
     const { control, slides } = toRefs(props);
     const videoRef = ref(null);
     const playing = ref(false);
-    const exif = reactive({
-      latitude: "",
-      longitude: "",
-      aperture: "",
-      shutter: "",
-      focallength: "",
-      iso: "",
-      lens: ""
-    });
     let currentSlideIndex = ref(0);
     let changeTimeout;
     let fadeTimeout;
@@ -96,17 +99,6 @@ export default {
       }
     };
 
-    const getExif = async () => {
-      let result = await exifr.parse(currentSlide.value.url);
-      exif.latitude = result.latitude;
-      exif.longitude = result.longitude;
-      exif.shutter = result.ShutterSpeedValue;
-      exif.aperture = result.FNumber;
-      exif.focallength = result.FocalLength;
-      exif.iso = result.ISO;
-      exif.lens = result.LensModel;
-    };
-
     const changeSlide = () => {
       if (!control.value.paused) {
         changeTimeout = setTimeout(() => {
@@ -118,9 +110,9 @@ export default {
                 ? 0
                 : currentSlideIndex.value + 1;
             showTheSlide.value = true;
-            getExif();
+            control.value.currentSlideIndex = currentSlideIndex.value;
             changeSlide();
-          }, 1000);
+          }, 2000);
         }, slide_interval);
       }
     };
@@ -166,8 +158,7 @@ export default {
       videoPauseOrStop,
       videoRef,
       playpause,
-      playing,
-      exif
+      playing
     };
   }
 };
@@ -177,7 +168,6 @@ export default {
 <style scoped>
 .showSlide {
   opacity: 1;
-  background-color: black;
 }
 .hideSlide {
   opacity: 0;

@@ -1,32 +1,32 @@
 <template>
   <div class="flex flex-col">
     <div
-      class="absolute bg-opacity-75 bg-blue flex flex-row h-8 w-full justify-around"
+      class="absolute bg-opacity-75 bg-blue flex flex-row h-8 w-full sm:justify-around justify-start"
     >
       <button
         @click="pauseSlides()"
-        class="noOutline"
+        class="noOutline px-1"
         :class="[control.paused ? 'text-goldenrod' : 'text-white']"
       >
         Pause
       </button>
       <button
         @click="fullscreen()"
-        class="noOutline"
+        class="noOutline px-1"
         :class="[showFullscreen ? 'text-goldenrod' : 'text-white']"
       >
         Fullscreen
       </button>
       <button
         @click="callThumbs()"
-        class="noOutline"
+        class="noOutline px-1"
         :class="[showThumbs ? 'text-goldenrod' : 'text-white']"
       >
         Thumbs
       </button>
       <button
         @click="callCollections()"
-        class="noOutline"
+        class="noOutline px-1"
         :class="[showCollections ? 'text-goldenrod' : 'text-white']"
       >
         Collections
