@@ -18,7 +18,7 @@ router.get("/listing", function(req, res, next) {
   if (collections.indexOf(dir) < 0) return next();
   ep.open()
     .then(() => {
-      return ep.readMetadata(`${imagePath}/${dir}`, ["--ext mov", "n"]);
+      return ep.readMetadata(`${imagePath}/${dir}`, ["-ext mov", "n"]); // Exclude 'mov' files..
     })
     .then((result, error) => {
       if (result) {

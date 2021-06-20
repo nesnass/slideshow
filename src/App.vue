@@ -37,6 +37,7 @@
 
 <script>
 import { ref, watch } from "vue";
+import moment from "moment";
 import Slideshow from "@/components/Slideshow";
 import Control from "@/components/Control";
 import LMap from "@/components/Map";
@@ -80,13 +81,28 @@ export default {
       )
         .then(response => response.json())
         .then(result => {
-          slides.value = result.map(exif => {
-            return {
-              url: `${host}/images/${controlState.value.selectedCollection}/${exif.FileName}`,
-              exif,
-              isVideo: exif.MIMEType === "video/mp4"
-            };
-          });
+          slides.value = result
+            .map(exif => {
+              let sortDate;
+              if (exif.MIMEType === "video/mp4") {
+                sortDate = moment.parseZone(
+                  exif.CreationDate,
+                  "YYYY:MM:DD hh:mm:ss+ZZ"
+                );
+              } else {
+                sortDate = moment.parseZone(
+                  exif.DateTimeOriginal,
+                  "YYYY:MM:DD hh:mm:ss"
+                );
+              }
+              return {
+                url: `${host}/images/${controlState.value.selectedCollection}/${exif.FileName}`,
+                exif,
+                sortDate,
+                isVideo: exif.MIMEType === "video/mp4"
+              };
+            })
+            .sort((a, b) => (a.sortDate.isBefore(b.sortDate) ? -1 : 1));
         });
     };
 
