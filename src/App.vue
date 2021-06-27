@@ -1,21 +1,17 @@
 <template>
   <div class="relative flex flex-col bg-black" ref="fullscreenElement">
-    <lmap class="fixed top-0 left-0" :control="controlState" :slides="slides" />
+    <lmap class="fixed top-0 left-0" />
     <slideshow
       v-if="slides.length"
       class="relative flex-col transform transition-transform duration-1000 ease-out"
       :class="[
-        showMap ? 'scale-25 origin-top-left' : 'scale-100 origin-top-left'
+        showMap ? 'scale-25 origin-top-left' : 'scale-100 origin-top-left',
       ]"
-      :slides="slides"
-      :control="controlState"
     />
     <control
       class="fixed w-full z-10"
       :collections="collections"
       v-show="showMenu"
-      :slides="slides"
-      :control="controlState"
       :fselement="fullscreenElement"
     />
     <div class="fixed top-0 right-0 z-20 flex flex-row mt-1">
@@ -35,114 +31,43 @@
   </div>
 </template>
 
-<script>
-import { ref, watch } from "vue";
-import moment from "moment";
-import Slideshow from "@/components/Slideshow";
-import Control from "@/components/Control";
-import LMap from "@/components/Map";
+<script lang="ts">
+import { defineComponent, ref } from 'vue'
+import { useControlStore } from './store/useControlStore'
+import Slideshow from '@/components/Slideshow.vue'
+import Control from '@/components/Control.vue'
+import LMap from '@/components/Map.vue'
 
-const host =
-  process.env.NODE_ENV === "production"
-    ? ""
-    : `https://${process.env.VUE_APP_HOST}:${process.env.VUE_APP_PORT}`;
+const { actions: controlActions, getters: controlGetters } = useControlStore()
 
-export default {
-  name: "App",
+export default defineComponent({
+  name: 'App',
   components: {
     slideshow: Slideshow,
     control: Control,
-    lmap: LMap
+    lmap: LMap,
   },
   setup() {
-    const thumbnails = ref(null);
-    const main = ref(null);
-    const showMenu = ref(false);
-    const showMap = ref(false);
-    const fullscreenElement = ref(null);
-    const collections = ref([]);
-    const slides = ref([]);
+    const thumbnails = ref(null)
+    const main = ref(null)
+    const showMenu = ref(false)
+    const showMap = ref(false)
+    const fullscreenElement = ref(null)
+    const slides = ref([])
 
-    const getSelectedCollection = () => {
-      fetch(
-        `${host}/listing?collection=${controlState.value.selectedCollection}`,
-        {
-          headers: {
-            "Content-Type": "application/json"
-          },
-          mode: "cors"
-        }
-      )
-        .then(response => response.json())
-        .then(result => {
-          slides.value.length = 0;
-          result.forEach(exif => {
-            let sortDate;
-            if (exif.MIMEType === "video/mp4") {
-              sortDate = moment.parseZone(
-                exif.CreationDate,
-                "YYYY:MM:DD hh:mm:ss+ZZ"
-              );
-            } else {
-              sortDate = moment.parseZone(
-                exif.DateTimeOriginal,
-                "YYYY:MM:DD hh:mm:ss"
-              );
-            }
-            const slide = {
-              url: `${host}/images/${controlState.value.selectedCollection}/${exif.FileName}`,
-              exif,
-              sortDate,
-              isVideo: exif.MIMEType === "video/mp4"
-            };
-            slides.value.push(slide);
-          });
-          slides.value.sort((a, b) =>
-            a.sortDate.isBefore(b.sortDate) ? -1 : 1
-          );
-        });
-    };
-
-    const getCollections = () => {
-      fetch(`${host}/collections`, {
-        headers: {
-          "Content-Type": "application/json"
-        },
-        mode: "cors"
-      })
-        .then(response => response.json())
-        .then(data => {
-          if (data && data.length > 0) {
-            collections.value = data;
-            controlState.value.selectedCollection = data[0];
-            getSelectedCollection();
-          }
-        });
-    };
-
-    watch(
-      () => controlState.value.selectedCollection,
-      newName => {
-        if (collections.value.indexOf(newName) > 0) {
-          getSelectedCollection();
-        }
-      }
-    );
-
-    getCollections();
+    controlActions.fetchCollections()
 
     return {
       slides,
       thumbnails,
-      collections,
+      collections: controlGetters.collections,
       main,
       showMenu,
       showMap,
-      controlState,
-      fullscreenElement
-    };
-  }
-};
+      fullscreenElement,
+    }
+  },
+})
 </script>
 
 <style lang="postcss">

@@ -6,7 +6,7 @@
       <button
         @click="pauseSlides()"
         class="noOutline px-1"
-        :class="[control.paused ? 'text-goldenrod' : 'text-white']"
+        :class="[paused ? 'text-goldenrod' : 'text-white']"
       >
         Pause
       </button>
@@ -34,7 +34,12 @@
     </div>
     <div class="flex flex-row flex-wrap mt-8" v-if="showThumbs">
       <div v-for="(slide, index) in slides" :key="index" class="flex">
-        <img :src="slide.url" @click="selectItem(index)" class="h-20" />
+        <img
+          :src="slide.thumbUrl"
+          alt="slide"
+          @click="selectItem(index)"
+          class="h-20"
+        />
       </div>
     </div>
     <div class="flex flex-row flex-wrap mt-8" v-if="showCollections">
@@ -50,63 +55,55 @@
   </div>
 </template>
 
-<script>
-import { ref, toRefs } from "vue";
-export default {
-  name: "Control",
+<script lang="ts">
+import { defineComponent, ref, toRefs } from 'vue'
+import { useControlStore } from '../store/useControlStore'
+const { getters: controlGetters, actions: controlActions } = useControlStore()
+
+export default defineComponent({
+  name: 'Control',
   props: {
-    control: { type: Object },
-    slides: { type: Array },
-    collections: { type: Array },
-    fselement: { type: HTMLElement }
+    fselement: { type: HTMLElement, required: true },
   },
   setup(props) {
-    const { control, fselement } = toRefs(props);
-    const showThumbs = ref(false);
-    const showFullscreen = ref(false);
-    const showCollections = ref(false);
-    const selectItem = index => {
-      control.value.selectedSlideIndex = index;
-      showThumbs.value = false;
-      control.value.paused = true;
-    };
-    const selectCollection = name => {
-      control.value.selectedCollection = name;
-      showCollections.value = false;
-    };
+    const { fselement } = toRefs(props)
+    const showThumbs = ref(false)
+    const showFullscreen = ref(false)
+    const showCollections = ref(false)
+    const selectItem = (index: number) => {
+      controlActions.requestSlideIndex(index)
+      controlActions.setPaused(true)
+      showThumbs.value = false
+    }
+    const selectCollection = (name: string) => {
+      controlActions.selectCollection(name)
+      showCollections.value = false
+    }
     const pauseSlides = () => {
-      control.value.paused = !control.value.paused;
-    };
+      controlActions.setPaused(!controlGetters.paused)
+    }
     const fullscreen = () => {
-      const element = fselement.value;
-      // Safari iOS
-      if (typeof document.webkitCurrentFullScreenElement !== "undefined") {
-        if (document.webkitFullscreenElement) {
-          document.webkitCancelFullScreen();
-          showFullscreen.value = false;
-        } else {
-          element.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-          showFullscreen.value = true;
-        }
+      const element = fselement.value
+      if (!document.fullscreenElement) {
+        element.requestFullscreen()
+        showFullscreen.value = true
       } else {
-        if (!document.fullscreenElement) {
-          element.requestFullscreen();
-          showFullscreen.value = true;
-        } else {
-          document.exitFullscreen();
-          showFullscreen.value = false;
-        }
+        document.exitFullscreen()
+        showFullscreen.value = false
       }
-    };
+    }
     const callThumbs = () => {
-      showThumbs.value = !showThumbs.value;
-      showCollections.value = false;
-    };
+      showThumbs.value = !showThumbs.value
+      showCollections.value = false
+    }
     const callCollections = () => {
-      showCollections.value = !showCollections.value;
-      showThumbs.value = false;
-    };
+      showCollections.value = !showCollections.value
+      showThumbs.value = false
+    }
     return {
+      slides: controlGetters.slides,
+      collections: controlGetters.collections,
+      paused: controlGetters.paused,
       selectItem,
       pauseSlides,
       showFullscreen,
@@ -115,10 +112,10 @@ export default {
       callThumbs,
       showCollections,
       callCollections,
-      selectCollection
-    };
-  }
-};
+      selectCollection,
+    }
+  },
+})
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

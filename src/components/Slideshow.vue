@@ -3,7 +3,6 @@
     <div
       class="flex flex-row justify-center bg-contain bg-no-repeat bg-center transition-opacity duration-700 ease-in h-screen"
       :class="[showTheSlide ? 'showSlide' : 'hideSlide']"
-      :style="slideStyle"
     >
       <div
         v-if="currentSlide.isVideo"
@@ -59,108 +58,89 @@
   </div>
 </template>
 
-<script>
-import { computed, ref, watch, toRefs } from "vue";
-import { useDrag } from "vue-use-gesture";
-import { useSpring } from "vue-use-spring";
-const slide_interval = process.env.VUE_APP_SLIDE_INTERVAL;
+<script lang="ts">
+import { defineComponent, computed, ref, watch } from 'vue'
+import { useControlStore } from '../store/useControlStore'
+const slideInterval = process.env.VUE_APP_SLIDE_INTERVAL
+const { getters: controlGetters, actions: controlActions } = useControlStore()
 
-export default {
-  name: "Slideshow",
-  props: {
-    control: { type: Object, required: true },
-    slides: { type: Array, required: true }
-  },
-  setup(props) {
-    const showTheSlide = ref(true);
-    const { control, slides } = toRefs(props);
-    const videoRef = ref(null);
-    const playing = ref(false);
-    let currentSlideIndex = ref(0);
-    let changeTimeout;
-    let fadeTimeout;
+export default defineComponent({
+  name: 'Slideshow',
+  setup() {
+    const showTheSlide = ref(true)
+    const videoRef = ref()
+    const playing = ref(false)
+    const currentSlide = controlGetters.currentSlide
+    const slides = controlGetters.slides
+    let currentSlideIndex = 0
+    let changeTimeout: number
+    let fadeTimeout: number
 
     const videoPauseOrStop = () => {
-      control.value.paused = false;
-      playing.value = false;
-    };
+      controlActions.setPaused(false)
+      playing.value = false
+    }
 
     const playpause = () => {
-      if (playing.value) {
-        videoRef.value.pause();
-        playing.value = false;
-        control.value.paused = false;
+      if (playing.value && videoRef.value) {
+        videoRef.value.pause()
+        playing.value = false
+        controlActions.setPaused(false)
       } else {
-        videoRef.value.play();
-        playing.value = true;
-        control.value.paused = true;
+        videoRef.value.play()
+        playing.value = true
+        controlActions.setPaused(true)
       }
-    };
+    }
 
     const changeSlide = () => {
-      if (!control.value.paused) {
+      if (!controlGetters.paused) {
         changeTimeout = setTimeout(() => {
-          showTheSlide.value = false;
+          showTheSlide.value = false
           // Fade timeout should match CSS timer or a little longer
           fadeTimeout = setTimeout(() => {
-            currentSlideIndex.value =
-              currentSlideIndex.value === slides.value.length - 1
+            currentSlideIndex =
+              currentSlideIndex === slides.value.length - 1
                 ? 0
-                : currentSlideIndex.value + 1;
-            showTheSlide.value = true;
-            control.value.currentSlideIndex = currentSlideIndex.value;
-            changeSlide();
-          }, 2000);
-        }, slide_interval);
+                : currentSlideIndex + 1
+            showTheSlide.value = true
+            controlActions.setCurrentSlideIndex(currentSlideIndex)
+            changeSlide()
+          }, 2000)
+        }, slideInterval)
       }
-    };
-    changeSlide();
+    }
+    changeSlide()
 
     watch(
-      () => control.value.selectedSlideIndex,
+      () => controlGetters.requestedSlideIndex.value,
       newIndex => {
         if (slides.value.length > newIndex && newIndex >= 0) {
-          clearTimeout(changeTimeout);
-          clearTimeout(fadeTimeout);
-          currentSlideIndex.value = newIndex;
-          changeSlide();
-          control.value.selectedSlideIndex = -1;
+          controlActions.setPaused(true)
+          controlActions.setCurrentSlideIndex(newIndex)
         }
       }
-    );
+    )
 
     watch(
-      () => control.value.paused,
+      () => controlGetters.paused,
       pause => {
         if (!pause) {
-          changeSlide();
+          changeSlide()
         } else {
-          clearTimeout(changeTimeout);
-          clearTimeout(fadeTimeout);
+          clearTimeout(changeTimeout)
+          clearTimeout(fadeTimeout)
+          showTheSlide.value = true
         }
       }
-    );
-
-    const currentSlide = computed(() => slides.value[currentSlideIndex.value]);
+    )
 
     const nextSlide = computed(() => {
-      return currentSlideIndex.value < slides.value.length - 2
-        ? slides.value[currentSlideIndex.value + 1]
-        : slides.value[0];
-    });
-
-    const [{ x, y }, set] = useSpring(() => ({ x: 0, y: 0 }));
-
-    const bindDrag = useDrag(({ down, movement: [mx, my] }) => {
-      set({ x: down ? mx : 0, y: down ? my : 0 });
-    });
-
-    const slideStyle = computed(() => ({
-      transform: `translate3d(${x.value}px,${y.value}px,0)`,
-      "background-image": !currentSlide.value.isVideo
-        ? `url(${currentSlide.value.url})`
-        : ""
-    }));
+      const currentIndex = controlGetters.currentSlideIndex.value
+      return currentIndex < slides.value.length - 2
+        ? slides.value[currentIndex + 1]
+        : slides.value[0]
+    })
 
     return {
       currentSlide,
@@ -170,11 +150,9 @@ export default {
       videoRef,
       playpause,
       playing,
-      bindDrag,
-      slideStyle
-    };
-  }
-};
+    }
+  },
+})
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->

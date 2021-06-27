@@ -1,15 +1,41 @@
 module.exports = {
   root: true,
   env: {
-    node: true
+    node: true,
   },
-  extends: ["plugin:vue/vue3-essential", "eslint:recommended", "@vue/prettier"],
+  extends: [
+    'plugin:vue/vue3-essential',
+    'eslint:recommended',
+    '@vue/typescript/recommended',
+    'prettier',
+    '@vue/prettier',
+    '@vue/prettier/@typescript-eslint',
+  ],
+  // parser: 'vue-eslint-parser',
   parserOptions: {
-    parser: "babel-eslint"
+    ecmaVersion: 2020,
   },
   rules: {
+    'quotes': ['error', 'single'],
+    'no-console': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'warn' : 'off',
     'comma-dangle': ['error', 'only-multiline'],
-    "no-console": process.env.NODE_ENV === "production" ? "warn" : "off",
-    "no-debugger": process.env.NODE_ENV === "production" ? "warn" : "off"
-  }
-};
+    'prettier/prettier': [
+      'error',
+      {
+        endOfLine: 'auto',
+      },
+    ],
+  },
+  overrides: [
+    {
+      files: [
+        '**/__tests__/*.{j,t}s?(x)',
+        '**/tests/unit/**/*.spec.{j,t}s?(x)',
+      ],
+      env: {
+        jest: true,
+      },
+    },
+  ],
+}
