@@ -3,11 +3,14 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, watch } from 'vue'
+import { defineComponent, watch, onMounted, ref, Ref } from 'vue'
 import { useControlStore } from '../store/useControlStore'
-import L, { Icon, Map, Marker } from 'leaflet'
-import '../tile.stamen'
+import L, { Icon, Map, Marker, TileLayerOptions } from 'leaflet'
 import myIconImage from '../assets/mappin.svg'
+
+interface ExtendedTLOptions extends TileLayerOptions {
+  ext: string
+}
 
 const { getters: controlGetters } = useControlStore()
 
@@ -15,6 +18,7 @@ export default defineComponent({
   name: 'Map',
   setup() {
     let marker: Marker
+    const mymap: Ref<Map | undefined> = ref()
     const mapType = 'terrain' // 'toner', 'watercolor'
     const myIcon: Icon = L.icon({
       iconUrl: myIconImage,
@@ -22,28 +26,35 @@ export default defineComponent({
       iconAnchor: [22, 94],
     })
 
-    const mymap: Map = L.map('mapid', { zoomControl: false }).setView(
-      controlGetters.currentLocation.value,
-      13
-    )
-    const layer = L.tileLayer(
-      `https://stamen-tiles-{s}.a.ssl.fastly.net/${mapType}/{z}/{x}/{y}.{ext}`,
-      {
-        attribution:
-          'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        subdomains: 'abcd',
-        minZoom: 0,
-        maxZoom: 20,
-      }
-    )
-    mymap.addLayer(layer)
+    const tlOptions: ExtendedTLOptions = {
+      attribution:
+        'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+      subdomains: 'abcd',
+      minZoom: 0,
+      maxZoom: 20,
+      ext: 'jpg',
+    }
+
+    onMounted(() => {
+      mymap.value = L.map('mapid', { zoomControl: false }).setView(
+        controlGetters.currentLocation.value,
+        14
+      )
+      const layer = L.tileLayer(
+        `https://stamen-tiles-{s}.a.ssl.fastly.net/${mapType}/{z}/{x}/{y}.{ext}`,
+        tlOptions
+      )
+      mymap.value.addLayer(layer)
+    })
 
     watch(
       () => controlGetters.currentLocation.value,
       newLocation => {
         if (marker) marker.remove()
-        marker = L.marker(newLocation, { icon: myIcon }).addTo(mymap)
-        mymap.flyTo(newLocation, 8)
+        if (mymap.value) {
+          marker = L.marker(newLocation, { icon: myIcon }).addTo(mymap.value)
+          mymap.value.flyTo(newLocation, 13)
+        }
       }
     )
 

@@ -80,7 +80,7 @@ export default defineComponent({
       showCollections.value = false
     }
     const pauseSlides = () => {
-      controlActions.setPaused(!controlGetters.paused)
+      controlActions.setPaused(!controlGetters.paused.value)
     }
     const fullscreen = () => {
       const element = fselement.value

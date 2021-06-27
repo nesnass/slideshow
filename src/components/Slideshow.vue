@@ -1,11 +1,20 @@
 <template>
-  <div class="flex flex-row justify-center bg-black" id="slides">
+  <div
+    class="flex flex-row justify-center bg-black"
+    id="slides"
+    v-if="currentSlide"
+  >
     <div
       class="flex flex-row justify-center bg-contain bg-no-repeat bg-center transition-opacity duration-700 ease-in h-screen"
       :class="[showTheSlide ? 'showSlide' : 'hideSlide']"
+      :style="{
+        'background-image': !currentSlide.isVideo
+          ? `url(${currentSlide.url})`
+          : '',
+      }"
     >
       <div
-        v-if="currentSlide.isVideo"
+        v-if="currentSlide && currentSlide.isVideo"
         class="relative flex flex-col justify-center items-center"
       >
         <video :src="currentSlide.url" ref="videoRef" @ended="videoPauseOrStop">
@@ -59,7 +68,7 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, computed, ref, watch } from 'vue'
+import { defineComponent, ref, watch } from 'vue'
 import { useControlStore } from '../store/useControlStore'
 const slideInterval = process.env.VUE_APP_SLIDE_INTERVAL
 const { getters: controlGetters, actions: controlActions } = useControlStore()
@@ -94,7 +103,7 @@ export default defineComponent({
     }
 
     const changeSlide = () => {
-      if (!controlGetters.paused) {
+      if (!controlGetters.paused.value) {
         changeTimeout = setTimeout(() => {
           showTheSlide.value = false
           // Fade timeout should match CSS timer or a little longer
@@ -123,7 +132,7 @@ export default defineComponent({
     )
 
     watch(
-      () => controlGetters.paused,
+      () => controlGetters.paused.value,
       pause => {
         if (!pause) {
           changeSlide()
@@ -135,16 +144,9 @@ export default defineComponent({
       }
     )
 
-    const nextSlide = computed(() => {
-      const currentIndex = controlGetters.currentSlideIndex.value
-      return currentIndex < slides.value.length - 2
-        ? slides.value[currentIndex + 1]
-        : slides.value[0]
-    })
-
     return {
       currentSlide,
-      nextSlide,
+      nextSlide: controlGetters.nextSlide,
       showTheSlide,
       videoPauseOrStop,
       videoRef,

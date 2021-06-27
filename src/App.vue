@@ -2,7 +2,6 @@
   <div class="relative flex flex-col bg-black" ref="fullscreenElement">
     <lmap class="fixed top-0 left-0" />
     <slideshow
-      v-if="slides.length"
       class="relative flex-col transform transition-transform duration-1000 ease-out"
       :class="[
         showMap ? 'scale-25 origin-top-left' : 'scale-100 origin-top-left',
@@ -19,13 +18,13 @@
         class="w-4 mr-4 cursor-pointer"
         src="@/assets/mappin.svg"
         alt="map icon"
-        @click="showMap = !showMap"
+        @click="showTheMap()"
       />
       <img
         class="w-4 mr-2 cursor-pointer"
         src="@/assets/hamburger.svg"
         alt="menu icon"
-        @click="showMenu = !showMenu"
+        @click="showTheMenu()"
       />
     </div>
   </div>
@@ -48,23 +47,44 @@ export default defineComponent({
     lmap: LMap,
   },
   setup() {
-    const thumbnails = ref(null)
-    const main = ref(null)
     const showMenu = ref(false)
     const showMap = ref(false)
     const fullscreenElement = ref(null)
-    const slides = ref([])
 
     controlActions.fetchCollections()
 
+    function showTheMap() {
+      showMap.value = !showMap.value
+    }
+    function showTheMenu() {
+      showMenu.value = !showMenu.value
+    }
+    function keyPressed(evt: KeyboardEvent) {
+      if (evt.code === 'Space') {
+        controlActions.setPaused(!controlGetters.paused.value)
+      } else if (evt.code === 'ArrowLeft') {
+        controlActions.setPaused(true)
+        let i = controlGetters.currentSlideIndex.value
+        i = i > 0 ? i - 1 : 0
+        controlActions.setCurrentSlideIndex(i)
+      } else if (evt.code === 'ArrowRight') {
+        controlActions.setPaused(true)
+        let i = controlGetters.currentSlideIndex.value
+        const l = controlGetters.slides.value.length - 2
+        i = i < l ? i + 1 : i
+        controlActions.setCurrentSlideIndex(i)
+      }
+    }
+    document.addEventListener('keyup', keyPressed)
+
     return {
-      slides,
-      thumbnails,
+      slides: controlGetters.slides,
       collections: controlGetters.collections,
-      main,
       showMenu,
       showMap,
       fullscreenElement,
+      showTheMap,
+      showTheMenu,
     }
   },
 })

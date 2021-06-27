@@ -32,7 +32,7 @@ const _controlState: Ref<ControlState> = ref({
   currentSlideIndex: -1,
   currentLocation: L.latLng(59.91, 10.75),
   requestedSlideIndex: -1,
-  selectedCollection: '',
+  selectedCollection: 'vietnam',
 })
 
 const host =
@@ -40,10 +40,19 @@ const host =
     ? ''
     : `https://${process.env.VUE_APP_HOST}:${process.env.VUE_APP_PORT}`
 
+const emptySlide: Slide = {
+  exif: {},
+  url: '',
+  thumbUrl: '',
+  sortDate: moment(),
+  isVideo: false,
+}
+
 interface Getters {
   collections: ComputedRef<string[]>
   slides: ComputedRef<Slide[]>
   currentSlide: ComputedRef<Slide>
+  nextSlide: ComputedRef<Slide>
   paused: ComputedRef<boolean>
   requestedSlideIndex: ComputedRef<number> // Slide selected by user
   currentSlideIndex: ComputedRef<number> // Current slide on display
@@ -61,9 +70,22 @@ const getters = {
     return computed(() => _controlState.value.paused)
   },
   get currentSlide(): ComputedRef<Slide> {
-    return computed(
-      () => _controlState.value.slides[_controlState.value.currentSlideIndex]
-    )
+    return computed(() => {
+      return _controlState.value.currentSlideIndex <
+        _controlState.value.slides.length - 1
+        ? _controlState.value.slides[_controlState.value.currentSlideIndex]
+        : emptySlide
+    })
+  },
+  get nextSlide(): ComputedRef<Slide> {
+    return computed(() => {
+      const currentIndex = _controlState.value.currentSlideIndex
+      const slides = _controlState.value.slides
+      if (slides.length === 0) return emptySlide
+      return currentIndex < slides.length - 2
+        ? slides[currentIndex + 1]
+        : slides[0]
+    })
   },
   get requestedSlideIndex(): ComputedRef<number> {
     return computed(() => _controlState.value.requestedSlideIndex)
