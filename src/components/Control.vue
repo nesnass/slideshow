@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col">
+  <div class="flex flex-col" id="control">
     <div
       class="absolute bg-opacity-75 bg-blue flex flex-row h-8 w-full sm:justify-around justify-start"
     >

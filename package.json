@@ -15,7 +15,9 @@
     "leaflet": "^1.7.1",
     "moment": "^2.29.1",
     "tailwindcss": "^1.8.9",
-    "vue": "^3.0.0-0"
+    "vue": "^3.0.0-0",
+    "vue-use-gesture": "^1.0.1",
+    "vue-use-spring": "^0.0.2"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

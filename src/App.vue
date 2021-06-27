@@ -60,12 +60,6 @@ export default {
     const showMenu = ref(false);
     const showMap = ref(false);
     const fullscreenElement = ref(null);
-    const controlState = ref({
-      pause: false,
-      currentSlideIndex: -1,
-      selectedSlideIndex: -1,
-      selectedCollection: ""
-    });
     const collections = ref([]);
     const slides = ref([]);
 
@@ -81,28 +75,31 @@ export default {
       )
         .then(response => response.json())
         .then(result => {
-          slides.value = result
-            .map(exif => {
-              let sortDate;
-              if (exif.MIMEType === "video/mp4") {
-                sortDate = moment.parseZone(
-                  exif.CreationDate,
-                  "YYYY:MM:DD hh:mm:ss+ZZ"
-                );
-              } else {
-                sortDate = moment.parseZone(
-                  exif.DateTimeOriginal,
-                  "YYYY:MM:DD hh:mm:ss"
-                );
-              }
-              return {
-                url: `${host}/images/${controlState.value.selectedCollection}/${exif.FileName}`,
-                exif,
-                sortDate,
-                isVideo: exif.MIMEType === "video/mp4"
-              };
-            })
-            .sort((a, b) => (a.sortDate.isBefore(b.sortDate) ? -1 : 1));
+          slides.value.length = 0;
+          result.forEach(exif => {
+            let sortDate;
+            if (exif.MIMEType === "video/mp4") {
+              sortDate = moment.parseZone(
+                exif.CreationDate,
+                "YYYY:MM:DD hh:mm:ss+ZZ"
+              );
+            } else {
+              sortDate = moment.parseZone(
+                exif.DateTimeOriginal,
+                "YYYY:MM:DD hh:mm:ss"
+              );
+            }
+            const slide = {
+              url: `${host}/images/${controlState.value.selectedCollection}/${exif.FileName}`,
+              exif,
+              sortDate,
+              isVideo: exif.MIMEType === "video/mp4"
+            };
+            slides.value.push(slide);
+          });
+          slides.value.sort((a, b) =>
+            a.sortDate.isBefore(b.sortDate) ? -1 : 1
+          );
         });
     };
 

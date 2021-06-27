@@ -21,7 +21,8 @@ router.get("/listing", function(req, res, next) {
       return ep.readMetadata(`${imagePath}/${dir}`, ["-ext mov", "n"]); // Exclude 'mov' files..
     })
     .then((result, error) => {
-      if (result) {
+      ep.close()
+      if (result && result.data) {
         const data = result.data.map((d) => {
           delete d.SourceFile
           delete d.Directory
@@ -30,9 +31,8 @@ router.get("/listing", function(req, res, next) {
         return res.json(data);
       }
       if (error) return res.error(error);
-      return res.send("No result");
+      return res.json([]);
     })
-    .then(() => ep.close())
     .catch((error) => {
       console.error(error);
       res.status(500);

@@ -1,13 +1,9 @@
 <template>
-  <div class="flex flex-row justify-center bg-black">
+  <div class="flex flex-row justify-center bg-black" id="slides">
     <div
       class="flex flex-row justify-center bg-contain bg-no-repeat bg-center transition-opacity duration-700 ease-in h-screen"
       :class="[showTheSlide ? 'showSlide' : 'hideSlide']"
-      :style="{
-        'background-image': !currentSlide.isVideo
-          ? `url(${currentSlide.url})`
-          : ''
-      }"
+      :style="slideStyle"
     >
       <div
         v-if="currentSlide.isVideo"
@@ -65,13 +61,15 @@
 
 <script>
 import { computed, ref, watch, toRefs } from "vue";
+import { useDrag } from "vue-use-gesture";
+import { useSpring } from "vue-use-spring";
 const slide_interval = process.env.VUE_APP_SLIDE_INTERVAL;
 
 export default {
   name: "Slideshow",
   props: {
-    control: { type: Object },
-    slides: { type: Array }
+    control: { type: Object, required: true },
+    slides: { type: Array, required: true }
   },
   setup(props) {
     const showTheSlide = ref(true);
@@ -151,6 +149,19 @@ export default {
         : slides.value[0];
     });
 
+    const [{ x, y }, set] = useSpring(() => ({ x: 0, y: 0 }));
+
+    const bindDrag = useDrag(({ down, movement: [mx, my] }) => {
+      set({ x: down ? mx : 0, y: down ? my : 0 });
+    });
+
+    const slideStyle = computed(() => ({
+      transform: `translate3d(${x.value}px,${y.value}px,0)`,
+      "background-image": !currentSlide.value.isVideo
+        ? `url(${currentSlide.value.url})`
+        : ""
+    }));
+
     return {
       currentSlide,
       nextSlide,
@@ -158,7 +169,9 @@ export default {
       videoPauseOrStop,
       videoRef,
       playpause,
-      playing
+      playing,
+      bindDrag,
+      slideStyle
     };
   }
 };
@@ -166,6 +179,10 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+.touch-box {
+  touch-action: none;
+  cursor: grab;
+}
 .showSlide {
   opacity: 1;
 }
