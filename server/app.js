@@ -22,8 +22,10 @@ router.get("/listing", function(req, res, next) {
     })
     .then((result, error) => {
       ep.close()
-      if (result) {
+      if (result && result.data) {
         const data = result.data.map((d) => {
+          const tSplit = d.FileName.split('.')
+          d.ThumbnailUrl = tSplit[0] + '_tn.jpeg'
           delete d.SourceFile
           delete d.Directory
           return d

@@ -5,7 +5,7 @@ import L, { LatLng } from 'leaflet'
 interface Slide {
   exif: Record<string, string>
   url: string
-  thumbUrl?: string
+  thumbnailUrl?: string
   sortDate: moment.Moment
   isVideo: boolean
 }
@@ -43,7 +43,7 @@ const host =
 const emptySlide: Slide = {
   exif: {},
   url: '',
-  thumbUrl: '',
+  thumbnailUrl: '',
   sortDate: moment(),
   isVideo: false,
 }
@@ -182,6 +182,7 @@ const actions = {
           }
           const slide: Slide = {
             url: `${host}/images/${_controlState.value.selectedCollection}/${exif.FileName}`,
+            thumbnailUrl: `${host}/images/${_controlState.value.selectedCollection}/thumbnails/${exif.ThumbnailUrl}`,
             exif,
             sortDate,
             isVideo: exif.MIMEType === 'video/mp4',

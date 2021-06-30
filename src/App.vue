@@ -3,6 +3,7 @@
     <lmap class="fixed top-0 left-0" />
     <slideshow
       class="relative flex-col transform transition-transform duration-1000 ease-out"
+      @click="showTheMap(false)"
       :class="[
         showMap ? 'scale-25 origin-top-left' : 'scale-100 origin-top-left',
       ]"
@@ -53,8 +54,9 @@ export default defineComponent({
 
     controlActions.fetchCollections()
 
-    function showTheMap() {
-      showMap.value = !showMap.value
+    function showTheMap(show?: boolean) {
+      if (show !== undefined) showMap.value = show
+      else showMap.value = !showMap.value
     }
     function showTheMenu() {
       showMenu.value = !showMenu.value

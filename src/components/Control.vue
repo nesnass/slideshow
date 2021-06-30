@@ -32,13 +32,16 @@
         Collections
       </button>
     </div>
-    <div class="flex flex-row flex-wrap mt-8" v-if="showThumbs">
+    <div
+      class="flex flex-row flex-wrap mt-8 overflow-y-auto h-screen"
+      v-if="showThumbs"
+    >
       <div v-for="(slide, index) in slides" :key="index" class="flex">
         <img
-          :src="slide.thumbUrl"
+          :src="slide.thumbnailUrl"
           alt="slide"
           @click="selectItem(index)"
-          class="h-20"
+          class="h-32"
         />
       </div>
     </div>

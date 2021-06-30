@@ -2,7 +2,7 @@
 
 * MacOS:
 
-  `rename -n 's/^(\d){2}/00\1' *.jpg`
+  `rename -n 's/^(\d){2}/00\1' *.jpeg`
 
 ## Converting .mov to mp4
 
