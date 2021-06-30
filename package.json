@@ -15,6 +15,7 @@
     "exifr": "^5.0.6",
     "leaflet": "^1.7.1",
     "moment": "^2.29.1",
+    "node-exiftool": "^2.3.0",
     "tailwindcss": "^1.8.9",
     "vue": "^3.0.0-0",
     "vue-use-gesture": "^1.0.1",

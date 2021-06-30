@@ -15,11 +15,12 @@
 
     `for i in *.mov; do ffmpeg -noautorotate -i "$i" -map_metadata 0 -movflags use_metadata_tags "${i%.*}.mp4"; done`
 
-* Video Thumbnails with ffmpeg:
-    `for i in *.mp4; do ffmpeg -i "$i" -ss 00:00:01.000 -vf scale=128:-1 -vframes 1 "${i%.*}_tn.jpg"; done`
-
 * Image thumbnails with ffmpeg: (?? Not woking ??)
-    `for i in *.jpeg; ffmpeg -i "$i" -vf scale=128:-1 "${i%.*}_tn.jpeg"; done`
+    `for i in *.jpeg; do ffmpeg -i "$i" -vf scale=128:-1 "${i%.*}_tn.jpeg"; done`
+
+* Video Thumbnails with ffmpeg:
+    `for i in *.mp4; do ffmpeg -i "$i" -ss 00:00:01.000 -vf scale=128:-1 -vframes 1 "${i%.*}_tn.jpeg"; done`
+
 ---------
 On Camera
 ---------
