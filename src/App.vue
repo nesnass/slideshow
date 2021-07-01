@@ -1,5 +1,6 @@
 <template>
   <div class="relative flex flex-col bg-black" ref="fullscreenElement">
+    <login class="fixed z-20 w-full h-full" v-if="!loggedin" />
     <lmap class="fixed top-0 left-0" />
     <slideshow
       class="relative flex-col transform transition-transform duration-1000 ease-out"
@@ -37,6 +38,7 @@ import { useControlStore } from './store/useControlStore'
 import Slideshow from '@/components/Slideshow.vue'
 import Control from '@/components/Control.vue'
 import LMap from '@/components/Map.vue'
+import Login from '@/components/Login.vue'
 
 const { actions: controlActions, getters: controlGetters } = useControlStore()
 
@@ -46,13 +48,15 @@ export default defineComponent({
     slideshow: Slideshow,
     control: Control,
     lmap: LMap,
+    login: Login,
   },
   setup() {
     const showMenu = ref(false)
     const showMap = ref(false)
     const fullscreenElement = ref(null)
+    const loggedin = controlGetters.loggedIn
 
-    controlActions.fetchCollections()
+    if (loggedin.value) controlActions.fetchCollections()
 
     function showTheMap(show?: boolean) {
       if (show !== undefined) showMap.value = show
@@ -80,6 +84,7 @@ export default defineComponent({
     document.addEventListener('keyup', keyPressed)
 
     return {
+      loggedin,
       slides: controlGetters.slides,
       collections: controlGetters.collections,
       showMenu,

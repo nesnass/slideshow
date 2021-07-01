@@ -5,6 +5,7 @@ import L, { LatLng } from 'leaflet'
 interface Slide {
   exif: Record<string, string>
   url: string
+  src: string
   thumbnailUrl?: string
   sortDate: moment.Moment
   isVideo: boolean
@@ -17,6 +18,7 @@ interface Location {
 
 interface ControlState {
   slides: Slide[]
+  loggedIn: boolean
   collections: string[]
   paused: boolean
   currentSlideIndex: number
@@ -28,6 +30,7 @@ interface ControlState {
 const _controlState: Ref<ControlState> = ref({
   collections: [],
   slides: [],
+  loggedIn: false,
   paused: false,
   currentSlideIndex: -1,
   currentLocation: L.latLng(59.91, 10.75),
@@ -43,6 +46,7 @@ const host =
 const emptySlide: Slide = {
   exif: {},
   url: '',
+  src: '',
   thumbnailUrl: '',
   sortDate: moment(),
   isVideo: false,
@@ -51,6 +55,7 @@ const emptySlide: Slide = {
 interface Getters {
   collections: ComputedRef<string[]>
   slides: ComputedRef<Slide[]>
+  loggedIn: ComputedRef<boolean>
   currentSlide: ComputedRef<Slide>
   nextSlide: ComputedRef<Slide>
   paused: ComputedRef<boolean>
@@ -65,6 +70,9 @@ const getters = {
   },
   get slides(): ComputedRef<Slide[]> {
     return computed(() => _controlState.value.slides)
+  },
+  get loggedIn(): ComputedRef<boolean> {
+    return computed(() => _controlState.value.loggedIn)
   },
   get paused(): ComputedRef<boolean> {
     return computed(() => _controlState.value.paused)
@@ -108,6 +116,8 @@ interface Actions {
   selectCollection: (c: string) => void
   fetchCollections: () => void
   fetchSelectedCollection: () => void
+  login: (password: string) => void
+  fetchImage: (url: string) => Promise<Blob>
 }
 const actions = {
   setPaused(isPaused: boolean): void {
@@ -117,18 +127,40 @@ const actions = {
   requestSlideIndex(index: number): void {
     _controlState.value.requestedSlideIndex = index
   },
+  login(password: string): void {
+    fetch(`${host}/login`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({ password }),
+      mode: 'cors',
+    })
+      .then(response => response.json())
+      .then(data => {
+        if (data) {
+          if (data.login) actions.fetchCollections()
+          _controlState.value.loggedIn = !!data.login
+        }
+      })
+  },
   // Set the current slide on display
   setCurrentSlideIndex(index: number): void {
     if (_controlState.value.slides[index]) {
-      const item = _controlState.value.slides[index].exif
-      if (item.GPSLatitude && item.GPSLongitude) {
+      const item = _controlState.value.slides[index]
+      const exif = item.exif
+      if (exif.GPSLatitude && exif.GPSLongitude) {
         const newLoc = L.latLng(
-          parseFloat(item.GPSLatitude),
-          parseFloat(item.GPSLongitude)
+          parseFloat(exif.GPSLatitude),
+          parseFloat(exif.GPSLongitude)
         )
         actions.setCurrentLocation(newLoc)
       }
       _controlState.value.currentSlideIndex = index
+      /* actions
+        .fetchImage(item.url)
+        .then(blob => (item.src = URL.createObjectURL(blob))) */
     }
   },
   setCurrentLocation(loc: LatLng): void {
@@ -145,6 +177,7 @@ const actions = {
       headers: {
         'Content-Type': 'application/json',
       },
+      credentials: 'include',
       mode: 'cors',
     })
       .then(response => response.json())
@@ -156,6 +189,17 @@ const actions = {
         }
       })
   },
+  fetchImage(url: string): Promise<Blob> {
+    return fetch(url, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      credentials: 'include',
+      mode: 'no-cors',
+    })
+      .then(response => response.blob())
+      .then(blob => Promise.resolve(blob))
+  },
   fetchSelectedCollection(): void {
     fetch(
       `${host}/listing?collection=${_controlState.value.selectedCollection}`,
@@ -163,6 +207,7 @@ const actions = {
         headers: {
           'Content-Type': 'application/json',
         },
+        credentials: 'include',
         mode: 'cors',
       }
     )
@@ -186,6 +231,7 @@ const actions = {
             url: `${host}/images/${_controlState.value.selectedCollection}/${exif.FileName}`,
             thumbnailUrl: `${host}/images/${_controlState.value.selectedCollection}/thumbnails/${exif.ThumbnailUrl}`,
             exif,
+            src: '',
             sortDate,
             isVideo: exif.MIMEType === 'video/mp4',
           }
