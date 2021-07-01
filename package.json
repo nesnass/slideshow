@@ -6,13 +6,14 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "start": "node server.js"
+    "start": "node server/server.js"
   },
   "dependencies": {
     "@types/leaflet": "^1.7.3",
     "core-js": "^3.6.5",
     "dotenv": "^8.2.0",
     "exifr": "^5.0.6",
+    "greenlock-express": "v4",
     "leaflet": "^1.7.1",
     "moment": "^2.29.1",
     "node-exiftool": "^2.3.0",
