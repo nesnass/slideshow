@@ -119,15 +119,17 @@ const actions = {
   },
   // Set the current slide on display
   setCurrentSlideIndex(index: number): void {
-    const item = _controlState.value.slides[index].exif
-    if (item.GPSLatitude && item.GPSLongitude) {
-      const newLoc = L.latLng(
-        parseFloat(item.GPSLatitude),
-        parseFloat(item.GPSLongitude)
-      )
-      actions.setCurrentLocation(newLoc)
+    if (_controlState.value.slides[index]) {
+      const item = _controlState.value.slides[index].exif
+      if (item.GPSLatitude && item.GPSLongitude) {
+        const newLoc = L.latLng(
+          parseFloat(item.GPSLatitude),
+          parseFloat(item.GPSLongitude)
+        )
+        actions.setCurrentLocation(newLoc)
+      }
+      _controlState.value.currentSlideIndex = index
     }
-    _controlState.value.currentSlideIndex = index
   },
   setCurrentLocation(loc: LatLng): void {
     _controlState.value.currentLocation = loc
