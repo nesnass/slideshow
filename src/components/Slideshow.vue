@@ -149,6 +149,7 @@ export default defineComponent({
       newIndex => {
         if (slides.value.length > newIndex && newIndex >= 0) {
           controlActions.setPaused(true)
+          currentSlideIndex = newIndex
           controlActions.setCurrentSlideIndex(newIndex)
         }
       }
