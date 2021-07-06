@@ -25,12 +25,17 @@
         v-if="currentSlide && currentSlide.isVideo"
         class="relative flex flex-col justify-center items-center"
       >
-        <video :src="currentSlide.url" ref="videoRef" @ended="videoPauseOrStop">
+        <video
+          :src="currentSlide.url"
+          class=" max-h-screen"
+          ref="videoRef"
+          @ended="videoPauseOrStop"
+        >
           <track label="English" kind="captions" srclang="en" src="" default />
         </video>
         <img
           alt="play or pause video"
-          class="z-20 w-12 m-4 cursor-pointer"
+          class="z-20 w-12 m-4 cursor-pointer fixed top-0 right-0 pt-8"
           :class="{ 'filter-green': playing }"
           src="@/assets/playpause.svg"
           @click="playpause()"

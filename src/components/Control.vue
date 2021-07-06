@@ -1,14 +1,28 @@
 <template>
   <div class="flex flex-col" id="control">
     <div
-      class="absolute bg-opacity-75 bg-blue flex flex-row h-8 w-full sm:justify-around justify-start"
+      class="absolute font-playful text-sm bg-opacity-75 bg-blue flex flex-row h-8 w-full sm:justify-around justify-start"
     >
+      <div class="flex flex-row">
+        <button
+          @click="slideBack()"
+          class="noOutline px-1 text-white font-bold"
+        >
+          ←
+        </button>
+        <button
+          @click="slideForward()"
+          class="noOutline px-1 text-white font-bold ml-2 md:ml-8"
+        >
+          →
+        </button>
+      </div>
       <button
         @click="pauseSlides()"
         class="noOutline px-1"
         :class="[paused ? 'text-goldenrod' : 'text-white']"
       >
-        Pause
+        {{ paused ? 'Paused' : 'Pause' }}
       </button>
       <button
         @click="fullscreen()"
@@ -103,12 +117,27 @@ export default defineComponent({
       showCollections.value = !showCollections.value
       showThumbs.value = false
     }
+    const slideBack = () => {
+      controlActions.setPaused(true)
+      let i = controlGetters.currentSlideIndex.value
+      i = i > 0 ? i - 1 : 0
+      controlActions.setCurrentSlideIndex(i)
+    }
+    const slideForward = () => {
+      controlActions.setPaused(true)
+      let i = controlGetters.currentSlideIndex.value
+      const l = controlGetters.slides.value.length - 1
+      i = i < l ? i + 1 : i
+      controlActions.setCurrentSlideIndex(i)
+    }
     return {
       slides: controlGetters.slides,
       collections: controlGetters.collections,
       paused: controlGetters.paused,
       selectItem,
       pauseSlides,
+      slideBack,
+      slideForward,
       showFullscreen,
       fullscreen,
       showThumbs,
