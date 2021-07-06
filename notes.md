@@ -21,6 +21,12 @@
 * Video Thumbnails with ffmpeg:
     `for i in *.mp4; do ffmpeg -i "$i" -ss 00:00:01.000 -vf scale=128:-1 -vframes 1 "${i%.*}_tn.jpeg"; done`
 
+* Renaming files (bulk):
+    `rename -v 's/\.jpeg$/_o.jpeg/' *.jpeg`
+
+* Resize images (bulk) retaining aspect ratio
+    `sips --resampleWidth 1280 *.jpeg`
+
 ---------
 On Camera
 ---------
