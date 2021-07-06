@@ -76,7 +76,7 @@ export default defineComponent({
       } else if (evt.code === 'ArrowRight') {
         controlActions.setPaused(true)
         let i = controlGetters.currentSlideIndex.value
-        const l = controlGetters.slides.value.length - 2
+        const l = controlGetters.slides.value.length - 1
         i = i < l ? i + 1 : i
         controlActions.setCurrentSlideIndex(i)
       }

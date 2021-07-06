@@ -20,9 +20,7 @@
     "moment": "^2.29.1",
     "node-exiftool": "^2.3.0",
     "tailwindcss": "^1.8.9",
-    "vue": "^3.0.0-0",
-    "vue-use-gesture": "^1.0.1",
-    "vue-use-spring": "^0.0.2"
+    "vue": "^3.0.0-0"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^2.33.0",

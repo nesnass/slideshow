@@ -80,7 +80,7 @@ const getters = {
   get currentSlide(): ComputedRef<Slide> {
     return computed(() => {
       return _controlState.value.currentSlideIndex <
-        _controlState.value.slides.length - 1
+        _controlState.value.slides.length
         ? _controlState.value.slides[_controlState.value.currentSlideIndex]
         : emptySlide
     })
