@@ -240,6 +240,7 @@ const actions = {
         _controlState.value.slides.sort((a: Slide, b: Slide) =>
           a.sortDate.isBefore(b.sortDate) ? -1 : 1
         )
+        actions.setCurrentSlideIndex(0)
       })
   },
 }
