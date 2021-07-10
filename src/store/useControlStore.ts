@@ -240,7 +240,9 @@ const actions = {
         _controlState.value.slides.sort((a: Slide, b: Slide) =>
           a.sortDate.isBefore(b.sortDate) ? -1 : 1
         )
-        actions.setCurrentSlideIndex(0)
+        // The next change of slide will move to index 0
+        _controlState.value.currentSlideIndex =
+          _controlState.value.slides.length
       })
   },
 }

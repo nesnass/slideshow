@@ -104,7 +104,6 @@ export default defineComponent({
     const playing = ref(false)
     const currentSlide = controlGetters.currentSlide
     const slides = controlGetters.slides
-    let currentSlideIndex = 0
     let changeTimeout: ReturnType<typeof setTimeout>
     let fadeTimeout: ReturnType<typeof setTimeout>
 
@@ -131,8 +130,9 @@ export default defineComponent({
           showTheSlide.value = false
           // Fade timeout should match CSS timer or a little longer
           fadeTimeout = setTimeout(() => {
+            let currentSlideIndex = controlGetters.currentSlideIndex.value
             currentSlideIndex =
-              currentSlideIndex === slides.value.length - 1
+              currentSlideIndex >= slides.value.length - 1
                 ? 0
                 : currentSlideIndex + 1
             showTheSlide.value = true
@@ -149,7 +149,6 @@ export default defineComponent({
       newIndex => {
         if (slides.value.length > newIndex && newIndex >= 0) {
           controlActions.setPaused(true)
-          currentSlideIndex = newIndex
           controlActions.setCurrentSlideIndex(newIndex)
         }
       }
