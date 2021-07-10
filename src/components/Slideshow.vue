@@ -168,7 +168,7 @@ export default defineComponent({
     )
 
     const formattedCreationDate = computed(() => {
-      return currentSlide.value.sortDate.format('ddd, MMM d YYYY, H:mm')
+      return currentSlide.value.sortDate.format('ddd, MMM D YYYY, H:mm')
     })
 
     return {
