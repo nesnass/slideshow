@@ -10,7 +10,7 @@ const router = express.Router();
 const path = require("path");
 const app = express();
 const imagePath = path.join(process.env.SLIDESHOW_ROOT);
-const collections = ["vietnam", "norway"];
+const collections = process.env.COLLECTIONS.split(',');
 
 function ensureAuthenticated(req, res, next) {
   if (req.method == 'OPTIONS') {
