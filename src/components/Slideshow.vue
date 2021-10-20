@@ -42,6 +42,12 @@
         />
       </div>
     </div>
+    <img
+      alt="download"
+      class="absolute z-20 w-6 m-4 cursor-pointer bottom-0 right-0 pb-1 pr-1"
+      src="@/assets/download.svg"
+      @click="download()"
+    />
     <p class="absolute z-10 text-white bg-blue25 bottom-0 right-0 p-2">
       <!--span v-if="currentSlide.exif.GPSLatitude"
         >{{ currentSlide.exif.GPSLatitude }}° + " " +
@@ -124,6 +130,26 @@ export default defineComponent({
       }
     }
 
+    const download = () => {
+      const httpRequest = new XMLHttpRequest()
+      httpRequest.onload = function() {
+        const fileReader = new FileReader()
+        fileReader.onloadend = function() {
+          document.write(
+            '<a href="' +
+              fileReader.result +
+              '" download>Save as</a><img src="' +
+              fileReader.result +
+              '"></a>'
+          )
+        }
+        fileReader.readAsDataURL(httpRequest.response)
+      }
+      httpRequest.open('GET', currentSlide.value.url)
+      httpRequest.responseType = 'blob'
+      httpRequest.send()
+    }
+
     const changeSlide = () => {
       if (!controlGetters.paused.value) {
         changeTimeout = setTimeout(() => {
@@ -180,6 +206,7 @@ export default defineComponent({
       videoRef,
       playpause,
       playing,
+      download,
     }
   },
 })
