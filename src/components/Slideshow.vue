@@ -44,7 +44,7 @@
     </div>
     <img
       alt="download"
-      class="absolute z-20 w-6 m-4 cursor-pointer bottom-0 right-0 pb-1 pr-1"
+      class="absolute z-20 w-6 m-4 cursor-pointer text-white fill-current bottom-0 right-0 pb-6 pr-1"
       src="@/assets/download.svg"
       @click="download()"
     />
@@ -131,23 +131,29 @@ export default defineComponent({
     }
 
     const download = () => {
-      const httpRequest = new XMLHttpRequest()
-      httpRequest.onload = function() {
-        const fileReader = new FileReader()
-        fileReader.onloadend = function() {
-          document.write(
-            '<a href="' +
-              fileReader.result +
-              '" download>Save as</a><img src="' +
-              fileReader.result +
-              '"></a>'
-          )
-        }
-        fileReader.readAsDataURL(httpRequest.response)
-      }
-      httpRequest.open('GET', currentSlide.value.url)
-      httpRequest.responseType = 'blob'
-      httpRequest.send()
+      const link = document.createElement('a')
+      // If you don't know the name or want to use
+      // the webserver default set name = ''
+      link.setAttribute('download', '')
+      link.href = currentSlide.value.url
+      document.body.appendChild(link)
+      link.click()
+      link.remove()
+      /*
+      fetch(currentSlide.value.url, {
+        credentials: 'include',
+        mode: 'no-cors',
+      })
+        .then(resp => resp.blob())
+        .then(blob => {
+          const url = window.URL.createObjectURL(blob)
+          const a = document.createElement('a')
+          a.style.display = 'none'
+          a.href = url
+          a.download = currentSlide.value.exif['FileName']
+          document.body.appendChild(a)
+          a.click()
+        }) */
     }
 
     const changeSlide = () => {

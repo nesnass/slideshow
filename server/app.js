@@ -31,7 +31,7 @@ if (process.env.NODE_ENV === 'development') {
   app.use((req, res, next) => {
     const allowedOrigins = [
       `${process.env.VUE_APP_HOST}:${process.env.VUE_APP_PORT}`,
-      `${process.env.VUE_APP_HOST}:8080`,
+      `https://${process.env.VUE_APP_HOST}:8080`,
     ]
     let referer = req.headers.referer || req.headers.Referer
     if (referer) {
