@@ -5,7 +5,15 @@
     v-if="currentSlide"
   >
     <div
-      class="flex flex-row justify-center bg-contain bg-no-repeat bg-center transition-opacity duration-700 ease-in h-screen"
+      class="
+        flex flex-row
+        justify-center
+        bg-contain bg-no-repeat bg-center
+        transition-opacity
+        duration-700
+        ease-in
+        h-screen
+      "
       :class="[showTheSlide ? 'showSlide' : 'hideSlide']"
       :style="{
         'background-image': !currentSlide.isVideo
@@ -17,12 +25,17 @@
         v-if="currentSlide && currentSlide.isVideo"
         class="relative flex flex-col justify-center items-center"
       >
-        <video :src="currentSlide.url" ref="videoRef" @ended="videoPauseOrStop">
+        <video
+          :src="currentSlide.url"
+          class=" max-h-screen"
+          ref="videoRef"
+          @ended="videoPauseOrStop"
+        >
           <track label="English" kind="captions" srclang="en" src="" default />
         </video>
         <img
           alt="play or pause video"
-          class="z-20 w-12 m-4 cursor-pointer"
+          class="z-20 w-12 m-4 cursor-pointer fixed top-0 right-0 pt-8"
           :class="{ 'filter-green': playing }"
           src="@/assets/playpause.svg"
           @click="playpause()"
@@ -34,6 +47,7 @@
         >{{ currentSlide.exif.GPSLatitude }}° + " " +
         {{ currentSlide.exif.GPSLongitude }}° <br
       /></span-->
+      <span class="text-sm">{{ formattedCreationDate }}<br /></span>
       <span
         >F {{ Number.parseFloat(currentSlide.exif.ApertureValue).toFixed(1)
         }}<br
@@ -48,7 +62,16 @@
       <span class="text-xs">{{ currentSlide.exif.LensModel }}<br /></span>
     </p>
     <div
-      class="absolute z-10 text-white bg-blue25 font-playful bottom-0 left-0 p-2"
+      class="
+        absolute
+        z-10
+        text-white
+        bg-blue25
+        font-playful
+        bottom-0
+        left-0
+        p-2
+      "
     >
       <p v-if="currentSlide.exif.Title" class="font-bold">
         {{ currentSlide.exif.Title }}
@@ -68,9 +91,9 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, watch } from 'vue'
+import { defineComponent, ref, watch, computed } from 'vue'
 import { useControlStore } from '../store/useControlStore'
-const slideInterval = process.env.VUE_APP_SLIDE_INTERVAL
+const slideInterval = parseInt(process.env.VUE_APP_SLIDE_INTERVAL)
 const { getters: controlGetters, actions: controlActions } = useControlStore()
 
 export default defineComponent({
@@ -81,9 +104,8 @@ export default defineComponent({
     const playing = ref(false)
     const currentSlide = controlGetters.currentSlide
     const slides = controlGetters.slides
-    let currentSlideIndex = 0
-    let changeTimeout: number
-    let fadeTimeout: number
+    let changeTimeout: ReturnType<typeof setTimeout>
+    let fadeTimeout: ReturnType<typeof setTimeout>
 
     const videoPauseOrStop = () => {
       controlActions.setPaused(false)
@@ -108,8 +130,9 @@ export default defineComponent({
           showTheSlide.value = false
           // Fade timeout should match CSS timer or a little longer
           fadeTimeout = setTimeout(() => {
+            let currentSlideIndex = controlGetters.currentSlideIndex.value
             currentSlideIndex =
-              currentSlideIndex === slides.value.length - 1
+              currentSlideIndex >= slides.value.length - 1
                 ? 0
                 : currentSlideIndex + 1
             showTheSlide.value = true
@@ -144,7 +167,12 @@ export default defineComponent({
       }
     )
 
+    const formattedCreationDate = computed(() => {
+      return currentSlide.value.sortDate.format('ddd, MMM D YYYY, H:mm')
+    })
+
     return {
+      formattedCreationDate,
       currentSlide,
       nextSlide: controlGetters.nextSlide,
       showTheSlide,

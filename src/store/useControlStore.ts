@@ -80,7 +80,7 @@ const getters = {
   get currentSlide(): ComputedRef<Slide> {
     return computed(() => {
       return _controlState.value.currentSlideIndex <
-        _controlState.value.slides.length - 1
+        _controlState.value.slides.length
         ? _controlState.value.slides[_controlState.value.currentSlideIndex]
         : emptySlide
     })
@@ -216,16 +216,20 @@ const actions = {
         _controlState.value.slides.length = 0
         result.forEach((exif: Record<string, string>) => {
           let sortDate
-          if (exif.MIMEType === 'video/mp4') {
+          const isVideo = exif.MIMEType === 'video/mp4'
+          if (isVideo && exif.CreationDate) {
             sortDate = moment.parseZone(
               exif.CreationDate,
-              'YYYY:MM:DD hh:mm:ss+ZZ'
+              'YYYY:MM:DD hh:mm:ssZ' // <-- Note: timezone included
             )
-          } else {
+          } else if (!isVideo && exif.DateTimeOriginal) {
             sortDate = moment.parseZone(
               exif.DateTimeOriginal,
               'YYYY:MM:DD hh:mm:ss'
             )
+          } else {
+            // Unable to determine the creation date..
+            sortDate = moment()
           }
           const slide: Slide = {
             url: `${host}/images/${_controlState.value.selectedCollection}/${exif.FileName}`,
@@ -233,13 +237,16 @@ const actions = {
             exif,
             src: '',
             sortDate,
-            isVideo: exif.MIMEType === 'video/mp4',
+            isVideo,
           }
           _controlState.value.slides.push(slide)
         })
         _controlState.value.slides.sort((a: Slide, b: Slide) =>
           a.sortDate.isBefore(b.sortDate) ? -1 : 1
         )
+        // The next change of slide will move to index 0
+        _controlState.value.currentSlideIndex =
+          _controlState.value.slides.length
       })
   },
 }
